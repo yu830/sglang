@@ -95,7 +95,13 @@ class SchedulerIpcChannels:
             clock_domain = None
             if detokenizer_router_metrics_enabled and not skip_tokenizer_init:
                 endpoint = port_args.detokenizer_ipc_name
-                if _is_local_endpoint(endpoint):
+                local_candidate = (
+                    endpoint
+                    == getattr(port_args, "detokenizer_router_local_endpoint", None)
+                    and endpoint.startswith("tcp://")
+                    and ";" not in endpoint
+                )
+                if _is_local_endpoint(endpoint) or local_candidate:
                     clock_domain = read_clock_domain()
                 if clock_domain is None:
                     logger.warning(
